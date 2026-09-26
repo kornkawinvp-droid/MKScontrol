@@ -5,6 +5,7 @@
 #define EN  22
 
 #define STEPS_PER_MM 400.0  // calibrate จริง: สั่ง 10mm ได้ 40mm จริง (16000 step / 40mm)
+#define TRAVEL_MAX_MM 340.0 // ระยะไกลสุดที่ยอมให้เคลื่อนที่
 
 AccelStepper stepper(1, STP, DIR); // DRIVER mode: (interface, stepPin, dirPin)
 
@@ -39,10 +40,16 @@ void handleSerialInput()
       if (c == '\n' || c == '\r') {
          if (inputBuffer.length() > 0) {
             float mm = inputBuffer.toFloat();
-            Serial.print("สั่งไปที่ ");
-            Serial.print(mm);
-            Serial.println(" mm");
-            moveToMM(mm);
+
+            if (mm < 0 || mm > TRAVEL_MAX_MM) {
+               Serial.println("ตำแหน่งไม่ถูกต้องกรุณาใส่ตัวเลขใหม่");
+            } else {
+               Serial.print("สั่งไปที่ ");
+               Serial.print(mm);
+               Serial.println(" mm");
+               moveToMM(mm);
+            }
+
             inputBuffer = "";
          }
       } else {
